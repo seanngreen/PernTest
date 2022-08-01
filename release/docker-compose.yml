@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+  app:
+    image: 743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr
+    build: .
+    networks:
+      - psql
+    ports:
+      - 80:80
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+  db:
+    image: postgres:14.4
+    networks:
+      - psql
+    environment:
+      - POSTGRES_DB=PernStackExample
+      - POSTGRES_PASSWORD=psql7lOgin&
+networks:
+  psql:
+
