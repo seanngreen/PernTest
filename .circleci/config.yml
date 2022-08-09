@@ -3,11 +3,22 @@ orbs:
   node: circleci/node@5.0.2
   aws-ecr: circleci/aws-ecr@8.1.2
 
+jobs:
+  blah:
+    executor:
+      name: noode/default
+      tag: 16.13.1
+    steps:
+    - checkout
+    - node/install-packages:
+      pkg-manager: npm
+
 workflows:
   default:
     jobs:
+      - blah
       - aws-ecr/build-and-push-image
         repo: test-ecr
         tag: "latest,v0.1.%{CIRCLE_BUILD_NUM}"
-        dockerfile: release/dockerfile
+        dockerfile: release/Dockerfile
         path: .
