@@ -15,14 +15,15 @@ jobs:
       tag: 16.13.1
     steps:
       - checkout
-      - node/install-packages:
-        app-dir: ./api
-        pkg-manager: npm
+      # - node/install-packages:
+      #   app-dir: ./api
+      #   pkg-manager: npm
 
 workflows:
   build:
     jobs:
       - build-test-api:
+        context: org-global
       # - build-test-ui:
   # build-deploy:
   #   jobs:
