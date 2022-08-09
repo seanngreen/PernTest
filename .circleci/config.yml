@@ -6,7 +6,7 @@ orbs:
 jobs:
   blah:
     executor:
-      name: noode/default
+      name: node/default
       tag: 16.13.1
     steps:
       - checkout
