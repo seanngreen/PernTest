@@ -7,9 +7,6 @@ parameters:
   deploy_build:
     type: boolean
     default: false
-  deploy_time_minutes:
-    type: integer
-    default: 60
 
 jobs:
   build-test-api:
