@@ -47,9 +47,9 @@ jobs:
       #     app-dir: ui
       #     pkg-manager: npm
       - run:
-          command: npm --prefix ui install ui
+          command: npm -C ./ui install ./ui
       - run:
-          command: npm --prefix api run test
+          command: npm -C ./ui run test
 
 
 workflows:
