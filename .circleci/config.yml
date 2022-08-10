@@ -43,34 +43,35 @@ jobs:
       tag: "16.14"
     steps:
       - checkout
-      - node/install-packages:
-          app-dir: ui
-          pkg-manager: npm
-      # - run:
-      #     command: npm --prefix api run test
+      # - node/install-packages:
+      #     app-dir: ui
+      #     pkg-manager: npm
+      - run:
+          command: npm --prefix ui install ui
+      - run:
+          command: npm --prefix api run test
 
 
 workflows:
   build-test:
     jobs:
-      - node/run:
-          app-dir: api
-          version: "16.14"
-          override-ci-command: npm install
-          npm-run: build
-      - node/run:
-          app-dir: ui
-          version: "16.14"
-          override-ci-command: npm install
-          npm-run: build
-      - node/test:
-          app-dir: api
-          version: "16.14"
-      - node/test:
-          app-dir: ui
-          version: "16.14"
-      # - checkout
-      # - build-test-api
+      # - node/run:
+      #     app-dir: api
+      #     version: "16.14"
+      #     override-ci-command: npm install
+      #     npm-run: build
+      # - node/run:
+      #     app-dir: ui
+      #     version: "16.14"
+      #     override-ci-command: npm install
+      #     npm-run: build
+      # - node/test:
+      #     app-dir: api
+      #     version: "16.14"
+      # - node/test:
+      #     app-dir: ui
+      #     version: "16.14"
+      - build-test-api
       # - build-test-ui
   # build-deploy:
   #   jobs:
