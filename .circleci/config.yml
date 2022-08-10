@@ -17,8 +17,9 @@ jobs:
       - checkout
       - node/install-packages:
           app-dir: api
-      #   app-dir: ./api
-      #   pkg-manager: npm
+          pkg-manager: npm
+      - run:
+          command: npm run test
 
 workflows:
   build:
