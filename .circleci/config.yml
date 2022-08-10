@@ -23,7 +23,7 @@ workflows:
   build:
     jobs:
       - build-test-api:
-        context: org-global
+
       # - build-test-ui:
   # build-deploy:
   #   jobs:
