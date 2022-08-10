@@ -71,7 +71,7 @@ workflows:
       # - node/test:
       #     app-dir: ui
       #     version: "16.14"
-      - build-test-api
+      - build-test-ui
       # - build-test-ui
   # build-deploy:
   #   jobs:
