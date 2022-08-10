@@ -18,8 +18,8 @@ jobs:
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
-      - node/test:
-          app-dir: api
+      - run:
+          command: npm --prefix api run test
 
 workflows:
   build:
