@@ -51,14 +51,21 @@ jobs:
 
 
 workflows:
-  build:
+  build-test:
     jobs:
       - node/run:
           app-dir: api
           version: "16.14"
           npm-run: build
+      - node/run:
+          app-dir: ui
+          version: "16.14"
+          npm-run: build
       - node/test:
           app-dir: api
+          version: "16.14"
+      - node/test:
+          app-dir: ui
           version: "16.14"
       # - checkout
       # - build-test-api
