@@ -19,7 +19,7 @@ jobs:
           app-dir: api
           pkg-manager: npm
       - run:
-          command: cd api | npm run test
+          command: npm run api/test
 
 workflows:
   build:
