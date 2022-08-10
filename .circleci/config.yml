@@ -3,10 +3,10 @@ orbs:
   node: circleci/node@5.0.2
   # aws-ecr: circleci/aws-ecr@8.1.2
 
-# parameters:
-#   deploy_build:
-#     type: boolean
-#     default: false
+parameters:
+  deploy_build:
+    type: boolean
+    default: false
 
 jobs:
   build-test-api:
