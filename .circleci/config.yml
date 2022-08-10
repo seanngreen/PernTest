@@ -12,10 +12,10 @@ jobs:
   build-test-api:
     executor:
       name: node/default
-      tag: "16.13.1"
     steps:
       - checkout
       - node/install-packages:
+        app-dir: "./api"
       #   app-dir: ./api
       #   pkg-manager: npm
 
