@@ -47,9 +47,9 @@ jobs:
       #     app-dir: ui
       #     pkg-manager: npm
       - run:
-          command: npm -C ./ui install
+          command: npm -C ./ui install ./ui
       - run:
-          command: npm -C ./ui run build
+          command: npm -C ./ui run build ./ui
 
 
 workflows:
