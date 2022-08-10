@@ -1,14 +1,31 @@
 version: 2.1
 orbs:
   node: circleci/node@5.0.2
-  # aws-ecr: circleci/aws-ecr@8.1.2
+  aws-ecr: circleci/aws-ecr@8.1.2
+  aws-cli: circleci/aws-cli@2.0.3
+  aws-s3: circleci/aws-s3@3.0.0
 
 parameters:
-  deploy_build:
+  deploy:
     type: boolean
     default: false
 
+executors:
+  aws-cli-docker:
+    docker:
+      - image: cimg/base:stable
+
 jobs:
+  example-aws-cli-job:
+    executor: aws-cli-docker
+    steps:
+      - aws-cli/install
+  example-aws-s3-job:
+    executor: aws-cli-docker
+    steps:
+      - aws-s3/copy:
+          from: ./CloudFormation/deploy.yaml
+          to: SomeS3Bucket 
   build-test-api:
     executor:
       name: node/default
@@ -18,15 +35,34 @@ jobs:
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
-      - run:
-          command: npm --prefix api run test
+      # - run:
+      #     command: npm --prefix api run test
+  build-test-ui:
+    executor:
+      name: node/default
+      tag: "16.14"
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: ui
+          pkg-manager: npm
+      # - run:
+      #     command: npm --prefix api run test
+
 
 workflows:
   build:
     jobs:
-      - build-test-api
-
-      # - build-test-ui:
+      - node/run:
+          app-dir: api
+          version: "16.14"
+          npm-run: build
+      - node/test:
+          app-dir: api
+          version: "16.14"
+      # - checkout
+      # - build-test-api
+      # - build-test-ui
   # build-deploy:
   #   jobs:
   #     - aws-ecr/build-and-push-image:
