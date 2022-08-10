@@ -49,7 +49,7 @@ jobs:
       - run:
           command: npm -C ./ui install ./ui
       - run:
-          command: npm -C ./ui run test
+          command: npm -C ./ui run build
 
 
 workflows:
