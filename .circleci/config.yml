@@ -103,6 +103,16 @@ jobs:
             ls -l ui
             cp -r ui/build api/dist
             ls -l api/dist
+  s3-copy:
+    docker:
+      - image: 'cimg/python:3.6'
+    steps:
+      - checkout
+      - run: mkdir bucket && echo "lorem ipsum" > bucket/build_asset.txt
+      - aws-s3/copy:
+          arguments: '--dryrun'
+          from: bucket/build_asset.txt
+          to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
       
 
 workflows:
@@ -143,14 +153,17 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - build-test-ui
-      - build-test-api
-      - bundle-code:
-          requires:
-            - build-test-ui
-            - build-test-api
+      - s3-copy
+      # - build-test-ui
+      # - build-test-api
+      # - bundle-code:
+      #     requires:
+      #       - build-test-ui
+      #       - build-test-api
       # - aws-ecr/build-and-push-image:
+      #     name: Build and push image to AWS ECR
       #     repo: test-ecr
       #     tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
       #     dockerfile: Dockerfile
       #     path: ./release
+
