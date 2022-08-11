@@ -99,10 +99,10 @@ jobs:
       - run: 
           command: |
             ls -l
-            cd api && ls -l
-            cd ../ui && ls -l
+            ls -l api
+            ls -l ui
             cp ui/build api/dist
-            cd ../api/dist && ls -l
+            ls -l api/dist
       
 
 workflows:
