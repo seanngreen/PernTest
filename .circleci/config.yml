@@ -56,9 +56,6 @@ jobs:
       tag: "16.14"
     steps:
       - checkout
-      - run:
-          command: |
-            CI=false
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
