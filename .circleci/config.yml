@@ -77,7 +77,7 @@ jobs:
       name: node/default
       tag: "16.14"
     steps:
-      #- checkout
+      - checkout
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
@@ -87,13 +87,17 @@ jobs:
       - run: 
           command: npm -C api run test
           name: Running unit tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api/build
       
 
 workflows:
   build-test:
     jobs:
       - build-test-ui
-      #- build-test-api
+      - build-test-api
       # - node/run:
       #     name: build-api
       #     app-dir: api
