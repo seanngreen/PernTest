@@ -65,9 +65,9 @@ jobs:
       - run: 
           command: CI=false npm -C ui run build
           name: Building UI
-      - run: 
-          command: npm -C ui run test
-          name: Running unit tests
+      # - run: 
+      #     command: npm -C ui run test
+      #     name: Running unit tests
       - persist_to_workspace:
           root: .
           paths:
