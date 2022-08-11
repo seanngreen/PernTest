@@ -68,6 +68,10 @@ jobs:
       - run: 
           command: npm -C ui run test
           name: Running unit tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build
   build-test-api:
     executor: 
       name: node/default
@@ -83,12 +87,13 @@ jobs:
       - run: 
           command: npm -C api run test
           name: Running unit tests
+      
 
 workflows:
   build-test:
     jobs:
-      - build-test-ui
-      - build-test-api
+      - build-test
+      #- build-test-api
       # - node/run:
       #     name: build-api
       #     app-dir: api
