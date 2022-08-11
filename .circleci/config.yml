@@ -11,7 +11,7 @@ parameters:
     default: true
 
 executors:
-  aws-cli-docker:
+  aws-executor:
     docker:
       - image: cimg/base:stable
   node-executor:
@@ -92,13 +92,12 @@ jobs:
           paths:
             - api/dist
   bundle-code:
-    executor: 
-      name: node/default
-      tag: "16.14"
+    executor: aws-executor
     steps:
       - attach_workspace:
           at: .
-      - run: echo ls -l
+      - run: 
+          command: echo ls -l
       
 
 workflows:
