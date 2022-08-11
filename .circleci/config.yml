@@ -56,7 +56,10 @@ jobs:
       tag: "16.14"
     steps:
       - run:
-          command: CI=false
+          command: |
+            CI=false
+            process.env.CI=false
+            $CI=false
 
 workflows:
   build-test:
