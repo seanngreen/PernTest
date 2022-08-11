@@ -91,17 +91,16 @@ jobs:
           root: .
           paths:
             - api/dist
-  warm-up:
-    executor: aws-executor
-    steps:
-      - run: ls
   bundle-code:
     executor: aws-executor
     steps:
       - attach_workspace:
           at: .
       - run: 
-          command: ls -l
+          command: |
+            ls -l
+            cd api && ls -l
+            cd ../ui && ls -l
       
 
 workflows:
@@ -144,7 +143,6 @@ workflows:
     jobs:
       - build-test-ui
       - build-test-api
-      - warm-up
       - bundle-code:
           requires:
             - build-test-ui
