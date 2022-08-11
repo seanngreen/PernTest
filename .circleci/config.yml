@@ -8,7 +8,7 @@ orbs:
 parameters:
   deploy:
     type: boolean
-    default: false
+    default: true
 
 executors:
   aws-cli-docker:
@@ -91,14 +91,23 @@ jobs:
           root: .
           paths:
             - api/dist
+  bundle-code:
+    executor: 
+      name: node/default
+      tag: "16.14"
+    steps:
+      - attach_workspace:
+          at: .
+      - run: echo ls -l
       
 
 workflows:
   build-test:
+    when:
+      not: << pipeline.parameters.deploy >>
     jobs:
       - build-test-ui
-      - build-test-api:
-          when: << pipeline.parameters.deploy >>
+      - build-test-api
       # - node/run:
       #     name: build-api
       #     app-dir: api
@@ -130,8 +139,14 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - aws-ecr/build-and-push-image:
-          repo: test-ecr
-          tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
-          dockerfile: Dockerfile
-          path: ./release
+      - build-test-ui
+      - build-test-api
+      - bundle-code:
+          requires:
+            - build-test-ui
+            - build-test-api
+      # - aws-ecr/build-and-push-image:
+      #     repo: test-ecr
+      #     tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
+      #     dockerfile: Dockerfile
+      #     path: ./release
