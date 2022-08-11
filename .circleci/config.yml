@@ -58,12 +58,12 @@ workflows:
       - node/run:
           app-dir: api
           version: "16.14"
-          override-ci-command: npm install
+          #override-ci-command: npm install
           npm-run: build
       - node/run:
           app-dir: ui
           version: "16.14"
-          override-ci-command: npm install
+          #override-ci-command: npm install
           npm-run: build
       - node/test:
           app-dir: api
