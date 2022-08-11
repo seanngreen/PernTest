@@ -62,7 +62,7 @@ jobs:
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
-      - run: npm run tests
+      - run: npm -C ui run tests
 
 workflows:
   build-test:
