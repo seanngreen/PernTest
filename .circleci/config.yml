@@ -55,6 +55,7 @@ jobs:
       name: node/default
       tag: "16.14"
     steps:
+      - checkout
       - run:
           command: |
             CI=false
