@@ -63,7 +63,6 @@ workflows:
     jobs:
       - set-ci-env
       - node/run:
-          executor: aws-cli-docker
           name: build-api
           app-dir: api
           version: "16.14"
