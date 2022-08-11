@@ -101,6 +101,8 @@ jobs:
             ls -l
             cd api && ls -l
             cd ../ui && ls -l
+            cp ui/build api/dist
+            cd ../api/dist && ls -l
       
 
 workflows:
