@@ -72,7 +72,7 @@ workflows:
           app-dir: ui
           version: "16.14"
   build-deploy:
-    when: pipeline.parameters.deploy
+    when: << pipeline.parameters.deploy >>
     jobs:
       - aws-ecr/build-and-push-image:
           repo: test-ecr
