@@ -97,7 +97,8 @@ workflows:
   build-test:
     jobs:
       - build-test-ui
-      - build-test-api
+      - build-test-api:
+          when: << pipeline.parameters.deploy >>
       # - node/run:
       #     name: build-api
       #     app-dir: api
