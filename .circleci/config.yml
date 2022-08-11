@@ -26,7 +26,7 @@ jobs:
       - aws-s3/copy:
           from: ./CloudFormation/deploy.yaml
           to: SomeS3Bucket 
-  build-test-api:
+  build-test-api-old:
     executor:
       name: node/default
       tag: "16.14"
@@ -37,7 +37,7 @@ jobs:
           pkg-manager: npm
       # - run:
       #     command: npm --prefix api run test
-  build-test-ui:
+  build-test-ui-old:
     executor:
       name: node/default
       tag: "16.14"
@@ -50,7 +50,7 @@ jobs:
           command: npm -C ./ui install ./ui
       - run:
           command: npm -C ./ui run build ./ui
-  set-ci-env:
+  build-test-ui:
     executor: 
       name: node/default
       tag: "16.14"
@@ -65,11 +65,27 @@ jobs:
       - run: 
           command: npm -C ui run test
           name: Running unit tests
+  build-test-api:
+    executor: 
+      name: node/default
+      tag: "16.14"
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: api
+          pkg-manager: npm
+      - run: 
+          command: CI=false npm -C api run build
+          name: Building API
+      - run: 
+          command: npm -C api run test
+          name: Running unit tests
 
 workflows:
   build-test:
     jobs:
-      - set-ci-env
+      - build-test-ui
+      - build-test-api
       # - node/run:
       #     name: build-api
       #     app-dir: api
