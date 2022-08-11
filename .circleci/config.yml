@@ -50,12 +50,20 @@ jobs:
           command: npm -C ./ui install ./ui
       - run:
           command: npm -C ./ui run build ./ui
-
-
+  set-ci-env:
+    executor: 
+      name: node/default
+      tag: "16.14"
+    steps:
+      - run:
+          command: process.env.CI = false
+          
 workflows:
   build-test:
     jobs:
+      - set-ci-env
       - node/run:
+          executor: aws-cli-docker
           name: build-api
           app-dir: api
           version: "16.14"
@@ -65,7 +73,7 @@ workflows:
           name: build-ui
           app-dir: ui
           version: "16.14"
-          override-ci-command: npm
+          override-ci-command: npm install
           npm-run: build
       - node/test:
           name: test-api
