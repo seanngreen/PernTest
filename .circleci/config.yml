@@ -56,10 +56,7 @@ jobs:
       tag: "16.14"
     steps:
       - run:
-          command: |
-            CI=false
-            process.env.CI=false
-            $CI=false
+          command: CI=false
 
 workflows:
   build-test:
@@ -71,12 +68,16 @@ workflows:
           version: "16.14"
           override-ci-command: npm install
           npm-run: build
+          requires:
+            - set-ci-env
       - node/run:
           name: build-ui
           app-dir: ui
           version: "16.14"
           override-ci-command: npm install
           npm-run: build
+          requires:
+            - set-ci-env
       - node/test:
           name: test-api
           app-dir: api
