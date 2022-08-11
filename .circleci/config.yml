@@ -110,7 +110,6 @@ jobs:
       - checkout
       - run: mkdir bucket && echo "lorem ipsum" > bucket/build_asset.txt
       - aws-s3/copy:
-          arguments: '--dryrun'
           from: bucket/build_asset.txt
           to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
       
