@@ -71,7 +71,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - build
+            - ui/build
   build-test-api:
     executor: 
       name: node/default
@@ -92,7 +92,7 @@ jobs:
 workflows:
   build-test:
     jobs:
-      - build-test
+      - build-test-ui
       #- build-test-api
       # - node/run:
       #     name: build-api
