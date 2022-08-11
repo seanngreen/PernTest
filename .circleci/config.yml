@@ -56,40 +56,45 @@ jobs:
       tag: "16.14"
     steps:
       - run:
-          command: CI=false
+          command: |
+            CI=false
+      - node/install-packages:
+          app-dir: ui
+          pkg-manager: npm
+      - run: npm run tests
 
 workflows:
   build-test:
     jobs:
       - set-ci-env
-      - node/run:
-          name: build-api
-          app-dir: api
-          version: "16.14"
-          override-ci-command: npm install
-          npm-run: build
-          requires:
-            - set-ci-env
-      - node/run:
-          name: build-ui
-          app-dir: ui
-          version: "16.14"
-          override-ci-command: npm install
-          npm-run: build
-          requires:
-            - set-ci-env
-      - node/test:
-          name: test-api
-          app-dir: api
-          version: "16.14"
-          requires:
-            - build-api
-      - node/test:
-          name: test-ui
-          app-dir: ui
-          version: "16.14"
-          requires: 
-            - build-ui
+      # - node/run:
+      #     name: build-api
+      #     app-dir: api
+      #     version: "16.14"
+      #     override-ci-command: npm install
+      #     npm-run: build
+      #     requires:
+      #       - set-ci-env
+      # - node/run:
+      #     name: build-ui
+      #     app-dir: ui
+      #     version: "16.14"
+      #     override-ci-command: npm install
+      #     npm-run: build
+      #     requires:
+      #       - set-ci-env
+      # - node/test:
+      #     name: test-api
+      #     app-dir: api
+      #     version: "16.14"
+      #     requires:
+      #       - build-api
+      # - node/test:
+      #     name: test-ui
+      #     app-dir: ui
+      #     version: "16.14"
+      #     requires: 
+      #       - build-ui
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
