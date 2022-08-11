@@ -14,6 +14,9 @@ executors:
   aws-cli-docker:
     docker:
       - image: cimg/base:stable
+  node-executor:
+    docker:
+      - image: cimg/node:16.14
 
 jobs:
   example-aws-cli-job:
@@ -70,7 +73,7 @@ jobs:
       name: node/default
       tag: "16.14"
     steps:
-      - checkout
+      #- checkout
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
