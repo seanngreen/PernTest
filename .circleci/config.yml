@@ -84,9 +84,9 @@ jobs:
       - run: 
           command: CI=false npm -C api run build
           name: Building API
-      - run: 
-          command: npm -C api run test
-          name: Running unit tests
+      # - run: 
+      #     command: npm -C api run test
+      #     name: Running unit tests
       - persist_to_workspace:
           root: .
           paths:
