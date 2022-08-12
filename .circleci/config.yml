@@ -92,7 +92,7 @@ jobs:
           paths:
             - api/dist
   bundle-code:
-    executor: aws-executor
+    executor: aws-cli/default
     steps:
       - attach_workspace:
           at: .
@@ -103,17 +103,14 @@ jobs:
             ls -l ui
             cp -r ui/build api/dist
             ls -l api/dist
-  s3-copy:
-    docker:
-      - image: 'cimg/python:3.6'
+  copy-cf-script-s3:
+    executor: aws-cli/default
     steps:
       - checkout
-      - run: mkdir bucket && echo "lorem ipsum" > bucket/build_asset.txt
       - aws-s3/copy:
-          from: bucket/build_asset.txt
+          from: ./.aws/stack.yaml
           to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
       
-
 workflows:
   build-test:
     when:
@@ -152,7 +149,7 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - s3-copy
+      - copy-cf-script-s3
       # - build-test-ui
       # - build-test-api
       # - bundle-code:
