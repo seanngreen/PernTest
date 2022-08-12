@@ -58,14 +58,10 @@ jobs:
     executor: aws-cli/default
     steps:
       - attach_workspace:
-          at: .
+          at: . 
       - run:
           command: |
-            ls -l
-            ls -l api
-            ls -l ui
             cp -r ui/build api/dist
-            ls -l api/dist
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
