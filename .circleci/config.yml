@@ -112,7 +112,7 @@ jobs:
     steps:
       #- checkout
       - aws-cli/setup
-      - run: aws iam list-users
+      - run: aws workdocs get-current-user
       
 workflows:
   build-test:
