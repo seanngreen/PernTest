@@ -17,7 +17,7 @@ executors:
 
 jobs:
   build-test-ui:
-    executor: 
+    executor:
       name: node/default
       tag: "16.14"
     steps:
@@ -25,10 +25,10 @@ jobs:
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
-      - run: 
+      - run:
           command: CI=false npm -C ui run build
           name: Building UI
-      # - run: 
+      # - run:
       #     command: npm -C ui run test
       #     name: Running unit tests
       - persist_to_workspace:
@@ -36,7 +36,7 @@ jobs:
           paths:
             - ui/build
   build-test-api:
-    executor: 
+    executor:
       name: node/default
       tag: "16.14"
     steps:
@@ -44,10 +44,10 @@ jobs:
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
-      - run: 
+      - run:
           command: CI=false npm -C api run build
           name: Building API
-      # - run: 
+      # - run:
       #     command: npm -C api run test
       #     name: Running unit tests
       - persist_to_workspace:
@@ -59,7 +59,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: 
+      - run:
           command: |
             ls -l
             ls -l api
@@ -72,7 +72,7 @@ jobs:
       - checkout
       - aws-s3/copy:
           from: ./.aws/Stack.yaml
-          to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
+          to: "s3://cf-templates-1c2gml3thnaeq-us-west-1"
   aws-cli-example:
     executor: aws-cli/default
     steps:
@@ -80,7 +80,7 @@ jobs:
       - aws-cli/setup:
           profile-name: adminuser
       - run: aws ecr list-images --repository-name test-ecr
-      
+
 workflows:
   build-test:
     when:
@@ -92,7 +92,7 @@ workflows:
     when: << pipeline.parameters.deploy >>
     jobs:
       - aws-cli-example
-      #- copy-cf-script-s3
+      - copy-cf-script-s3
       # - build-test-ui
       # - build-test-api
       # - bundle-code:
@@ -105,4 +105,3 @@ workflows:
       #     tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
       #     dockerfile: Dockerfile
       #     path: ./release
-
