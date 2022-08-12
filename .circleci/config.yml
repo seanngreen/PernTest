@@ -8,7 +8,7 @@ orbs:
 parameters:
   deploy:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node-executor:
@@ -80,7 +80,7 @@ jobs:
       - aws-cli/setup:
           profile-name: adminuser
       - run: aws ecr list-images --repository-name test-ecr
-      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-106" --capabilities CAPABILITY_NAMED_IAM
+      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" --capabilities CAPABILITY_NAMED_IAM
 
 workflows:
   build-test:
@@ -92,7 +92,7 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - aws-cli-example
+      #- aws-cli-example
       #- copy-cf-script-s3
       # - build-test-ui
       # - build-test-api
@@ -100,12 +100,12 @@ workflows:
       #     requires:
       #       - build-test-ui
       #       - build-test-api
-      # - aws-ecr/build-and-push-image:
-      #     name: build-push-image
-      #     repo: test-ecr
-      #     tag: "build-<<pipeline.number>>"
-      #     dockerfile: Dockerfile
-      #     path: ./release
+      - aws-ecr/build-and-push-image:
+          name: build-push-image
+          repo: test-ecr
+          tag: "build-<<pipeline.number>>"
+          dockerfile: Dockerfile
+          path: ./release
       # - aws-cli-example:
       #     requires:
       #       - copy-cf-script-s3
