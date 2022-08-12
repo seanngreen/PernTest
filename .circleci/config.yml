@@ -111,7 +111,8 @@ jobs:
     executor: aws-cli/default
     steps:
       #- checkout
-      - aws-cli/setup
+      - aws-cli/setup:
+          profile-name: example
       - run: aws workdocs get-current-user
       
 workflows:
@@ -153,7 +154,8 @@ workflows:
     when: << pipeline.parameters.deploy >>
     jobs:
       #- copy-cf-script-s3
-      - aws-cli-example
+      - aws-cli-example:
+          context: aws
       # - build-test-ui
       # - build-test-api
       # - bundle-code:
