@@ -108,7 +108,7 @@ jobs:
     steps:
       - checkout
       - aws-s3/copy:
-          from: ./.aws/stack.yaml
+          from: ./.aws/Stack.yaml
           to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
       
 workflows:
