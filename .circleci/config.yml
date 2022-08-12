@@ -10,10 +10,6 @@ parameters:
     type: boolean
     default: true
 
-executors:
-  aws-executor:
-    docker:
-      - image: cimg/base:stable
   node-executor:
     docker:
       - image: cimg/node:16.14
@@ -110,6 +106,12 @@ jobs:
       - aws-s3/copy:
           from: ./.aws/Stack.yaml
           to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
+  aws-cli-example:
+    executor: aws-cli/default
+    steps:
+      #- checkout
+      - aws-cli/setup:
+      - run: aws get-currentuser
       
 workflows:
   build-test:
@@ -149,7 +151,8 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - copy-cf-script-s3
+      #- copy-cf-script-s3
+      - aws-cli-example
       # - build-test-ui
       # - build-test-api
       # - bundle-code:
