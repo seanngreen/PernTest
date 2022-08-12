@@ -79,8 +79,8 @@ jobs:
       #- checkout
       - aws-cli/setup:
           profile-name: adminuser
-      - run: aws ecr list-images --repository-name test-ecrstring
-      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "s3://cf-templates-1c2gml3thnaeq-us-west-1/Stack.yaml" --parameters "ParameterKey=ImageName,ParameterValue=743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>"
+      - run: aws ecr list-images --repository-name test-ecr
+      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "s3://cf-templates-1c2gml3thnaeq-us-west-1/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-106"
 
 workflows:
   build-test:
@@ -92,20 +92,21 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - copy-cf-script-s3
+      - aws-cli-example
+      #- copy-cf-script-s3
       # - build-test-ui
       # - build-test-api
       # - bundle-code:
       #     requires:
       #       - build-test-ui
       #       - build-test-api
-      - aws-ecr/build-and-push-image:
-          name: build-push-image
-          repo: test-ecr
-          tag: "build-<<pipeline.number>>"
-          dockerfile: Dockerfile
-          path: ./release
-      - aws-cli-example:
-          requires:
-            - copy-cf-script-s3
-            - build-push-image
+      # - aws-ecr/build-and-push-image:
+      #     name: build-push-image
+      #     repo: test-ecr
+      #     tag: "build-<<pipeline.number>>"
+      #     dockerfile: Dockerfile
+      #     path: ./release
+      # - aws-cli-example:
+      #     requires:
+      #       - copy-cf-script-s3
+      #       - build-push-image
