@@ -102,6 +102,6 @@ workflows:
       - aws-ecr/build-and-push-image:
           name: Build and push image to AWS ECR
           repo: test-ecr
-          tag: "latest,v0.1.${pipeline.number}"
+          tag: "latest,v0.1.<<pipeline.number>>"
           dockerfile: Dockerfile
           path: ./release
