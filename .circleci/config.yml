@@ -111,8 +111,7 @@ jobs:
     executor: aws-cli/default
     steps:
       #- checkout
-      - aws-cli/setup:
-          profile-name: example
+      - aws-cli/setup
       - run: aws workdocs get-current-user
       
 workflows:
