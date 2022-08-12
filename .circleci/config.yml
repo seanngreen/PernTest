@@ -22,9 +22,15 @@ jobs:
       tag: "16.14"
     steps:
       - checkout
+      - restore_cache:
+          key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
+      - save_cache:
+          key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+          paths:
+            - ./ui/node_modules
       - run:
           command: CI=false npm -C ui run build
           name: Building UI
@@ -41,9 +47,15 @@ jobs:
       tag: "16.14"
     steps:
       - checkout
+      - restore_cache:
+          key: api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
+      - save_cache:
+          key: api-node_modules-v1-{{checksum "api/package-lock.json"}}
+          paths:
+            - ./api/node_modules
       - run:
           command: CI=false npm -C api run build
           name: Building API
