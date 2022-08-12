@@ -1,26 +1,108 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
+orbs:
+  node: circleci/node@5.0.2
+  aws-ecr: circleci/aws-ecr@8.1.2
+  aws-cli: circleci/aws-cli@2.0.3
+  aws-s3: circleci/aws-s3@3.0.0
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+parameters:
+  deploy:
+    type: boolean
+    default: true
+
+executors:
+  node-executor:
     docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: cimg/node:16.14
+
+jobs:
+  build-test-ui:
+    executor: 
+      name: node/default
+      tag: "16.14"
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+      - node/install-packages:
+          app-dir: ui
+          pkg-manager: npm
+      - run: 
+          command: CI=false npm -C ui run build
+          name: Building UI
+      # - run: 
+      #     command: npm -C ui run test
+      #     name: Running unit tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ui/build
+  build-test-api:
+    executor: 
+      name: node/default
+      tag: "16.14"
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: api
+          pkg-manager: npm
+      - run: 
+          command: CI=false npm -C api run build
+          name: Building API
+      # - run: 
+      #     command: npm -C api run test
+      #     name: Running unit tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api/dist
+  bundle-code:
+    executor: aws-cli/default
+    steps:
+      - attach_workspace:
+          at: .
+      - run: 
+          command: |
+            ls -l
+            ls -l api
+            ls -l ui
+            cp -r ui/build api/dist
+            ls -l api/dist
+  copy-cf-script-s3:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-s3/copy:
+          from: ./.aws/Stack.yaml
+          to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
+  aws-cli-example:
+    executor: aws-cli/default
+    steps:
+      #- checkout
+      - aws-cli/setup:
+          profile-name: adminuser
+      - run: aws ecr list-images --repository-name test-ecr
+      
 workflows:
-  say-hello-workflow:
+  build-test:
+    when:
+      not: << pipeline.parameters.deploy >>
     jobs:
-      - say-hello
+      - build-test-ui
+      - build-test-api
+  build-deploy:
+    when: << pipeline.parameters.deploy >>
+    jobs:
+      - aws-cli-example
+      #- copy-cf-script-s3
+      # - build-test-ui
+      # - build-test-api
+      # - bundle-code:
+      #     requires:
+      #       - build-test-ui
+      #       - build-test-api
+      # - aws-ecr/build-and-push-image:
+      #     name: Build and push image to AWS ECR
+      #     repo: test-ecr
+      #     tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
+      #     dockerfile: Dockerfile
+      #     path: ./release
+
