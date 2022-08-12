@@ -79,7 +79,7 @@ jobs:
       #- checkout
       - aws-cli/setup:
           profile-name: adminuser
-      - run: aws workdocs get-current-user
+      - run: aws ecr list-images --repository-name test-ecr
       
 workflows:
   build-test:
