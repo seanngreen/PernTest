@@ -80,7 +80,7 @@ jobs:
       - aws-cli/setup:
           profile-name: adminuser
       - run: aws ecr list-images --repository-name test-ecr
-      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "s3://cf-templates-1c2gml3thnaeq-us-west-1/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-106"
+      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-106"
 
 workflows:
   build-test:
