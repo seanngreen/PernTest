@@ -73,7 +73,7 @@ jobs:
       - aws-s3/copy:
           from: ./.aws/Stack.yaml
           to: "s3://cf-templates-1c2gml3thnaeq-us-west-1"
-  aws-cli-example:
+  deploy-app:
     executor: aws-cli/default
     steps:
       #- checkout
@@ -106,7 +106,7 @@ workflows:
           tag: "build-<<pipeline.number>>"
           dockerfile: Dockerfile
           path: ./release
-      # - aws-cli-example:
-      #     requires:
-      #       - copy-cf-script-s3
-      #       - build-push-image 
+      - deploy-app:
+          requires:
+            - copy-cf-script-s3
+            - build-push-image 
