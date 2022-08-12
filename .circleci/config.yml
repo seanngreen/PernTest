@@ -91,7 +91,8 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - aws-cli-example
+      - aws-cli-example:
+          context: aws
       #- copy-cf-script-s3
       # - build-test-ui
       # - build-test-api
