@@ -78,7 +78,7 @@ jobs:
     steps:
       #- checkout
       - aws-cli/setup
-      #- run: aws workdocs get-current-user
+      - run: aws workdocs get-current-user
       
 workflows:
   build-test:
