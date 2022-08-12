@@ -16,40 +16,6 @@ executors:
       - image: cimg/node:16.14
 
 jobs:
-  example-aws-cli-job:
-    executor: aws-cli-docker
-    steps:
-      - aws-cli/install
-  example-aws-s3-job:
-    executor: aws-cli-docker
-    steps:
-      - aws-s3/copy:
-          from: ./CloudFormation/deploy.yaml
-          to: SomeS3Bucket 
-  build-test-api-old:
-    executor:
-      name: node/default
-      tag: "16.14"
-    steps:
-      - checkout
-      - node/install-packages:
-          app-dir: api
-          pkg-manager: npm
-      # - run:
-      #     command: npm --prefix api run test
-  build-test-ui-old:
-    executor:
-      name: node/default
-      tag: "16.14"
-    steps:
-      - checkout
-      # - node/install-packages:
-      #     app-dir: ui
-      #     pkg-manager: npm
-      - run:
-          command: npm -C ./ui install ./ui
-      - run:
-          command: npm -C ./ui run build ./ui
   build-test-ui:
     executor: 
       name: node/default
@@ -121,34 +87,6 @@ workflows:
     jobs:
       - build-test-ui
       - build-test-api
-      # - node/run:
-      #     name: build-api
-      #     app-dir: api
-      #     version: "16.14"
-      #     override-ci-command: npm install
-      #     npm-run: build
-      #     requires:
-      #       - set-ci-env
-      # - node/run:
-      #     name: build-ui
-      #     app-dir: ui
-      #     version: "16.14"
-      #     override-ci-command: npm install
-      #     npm-run: build
-      #     requires:
-      #       - set-ci-env
-      # - node/test:
-      #     name: test-api
-      #     app-dir: api
-      #     version: "16.14"
-      #     requires:
-      #       - build-api
-      # - node/test:
-      #     name: test-ui
-      #     app-dir: ui
-      #     version: "16.14"
-      #     requires: 
-      #       - build-ui
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
