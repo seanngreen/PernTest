@@ -112,7 +112,7 @@ jobs:
     steps:
       #- checkout
       - aws-cli/setup
-      - run: aws get-currentuser
+      - run: aws get-current-user
       
 workflows:
   build-test:
