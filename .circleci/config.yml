@@ -49,7 +49,7 @@ jobs:
           app-dir: api
           pkg-manager: npm
       - save_cache:
-          key: api-node_modules-v1-{{checksum "package-lock.json"}}
+          key: api-node_modules-v1-{{checksum "api/package-lock.json"}}
           paths:
             - ./api/node_modules
       - run:
