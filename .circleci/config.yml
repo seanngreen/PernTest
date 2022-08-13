@@ -87,9 +87,14 @@ jobs:
       #- checkout
       - aws-cli/setup:
           profile-name: adminuser
-      - run: aws ecr list-images --repository-name test-ecr
-      - run: aws cloudformation create-stack --stack-name "build-<<pipeline.number>>" --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" --capabilities CAPABILITY_NAMED_IAM
-
+      # for testing connectivity: - run: aws ecr list-images --repository-name test-ecr
+      - run: 
+          command: |
+            buildid="build-<<pipeline.number>>"
+            echo $buildid
+            aws cloudformation create-stack --stack-name "build-<<pipeline.number>>"  |
+            --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" | 
+            --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" --capabilities CAPABILITY_NAMED_IAM
 workflows:
   build-test:
     when:
