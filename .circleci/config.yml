@@ -78,6 +78,7 @@ jobs:
       - run:
           command: |
             cp -r ui/build api
+            rm -r ui
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
@@ -108,7 +109,6 @@ jobs:
             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - run: |
           ls -l
-          ls -l api
       - aws-ecr/build-and-push-image:
           checkout: false
           attach-workspace: false
