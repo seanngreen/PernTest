@@ -98,7 +98,7 @@ jobs:
             --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" \
             --capabilities CAPABILITY_NAMED_IAM
   build-push-image:
-    executor: aws-cli/default
+    executor: aws-ecr/default
     steps:
       - attach_workspace:
           at: .
