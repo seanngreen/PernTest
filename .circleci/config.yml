@@ -21,8 +21,9 @@ jobs:
     executor: node-executor
     steps:
       - checkout
+      - run: echo 'export UI_CACHE_KEY="ui-node_modules-v1-{{checksum "ui/package-lock.json"}}"' >> $BASH_ENV
       - restore_cache:
-          key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+          key: ${UI_CACHE_KEYui-node_modules-v1-{{checksum "ui/package-lock.json"}}
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
@@ -36,10 +37,14 @@ jobs:
       # - run:
       #     command: npm -C ui run test
       #     name: Running unit tests
-      # - persist_to_workspace:
-      #     root: .
-      #     paths:
-      #       - ui/build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./ui/build
+            - ./ui/package-lock.json
+      - run:
+          name: "Setup custom environment variables"
+          command: echo 'export MY_ENV_VAR="FOO"' >> $BASH_ENV
   build-test-api:
     executor: node-executor
     steps:
@@ -56,21 +61,24 @@ jobs:
       - run:
           command: CI=false npm -C api run build
           name: Building API
+      - run:
+          command: rm -r api/dist
       # - run:
       #     command: npm -C api run test
       #     name: Running unit tests
-      # - persist_to_workspace:
-      #     root: .
-      #     paths:
-      #       - api/dist
-  # bundle-code:
-  #   executor: aws-cli/default
-  #   steps:
-  #     - attach_workspace:
-  #         at: . 
-  #     - run:
-  #         command: |
-  #           cp -r ui/build api/dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api
+  bundle-code:
+    executor: aws-cli/default
+    steps:
+      - attach_workspace:
+          at: . 
+      - run:
+          command: |
+            cp -r ui/build api
+            rm -r ui
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
@@ -81,17 +89,34 @@ jobs:
   deploy-app:
     executor: aws-cli/default
     steps:
-      #- checkout
       - aws-cli/setup:
           profile-name: adminuser
-      # for testing connectivity: - run: aws ecr list-images --repository-name test-ecr
+      # - run: aws ecr list-images --repository-name test-ecr #for testing connectivity 
       - run: 
           command: |
-            buildid="build-<<pipeline.number>>"
-            echo $buildid
             aws cloudformation create-stack --stack-name "build-<<pipeline.number>>"  \
             --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" \
-            --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" --capabilities CAPABILITY_NAMED_IAM
+            --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" \
+            --capabilities CAPABILITY_NAMED_IAM
+  build-push-image:
+    executor: aws-ecr/default
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys: 
+            - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+            - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      - run: |
+          ls -l
+      - aws-ecr/build-and-push-image:
+          checkout: false
+          attach-workspace: false
+          repo: test-ecr
+          tag: "build-<<pipeline.number>>"
+          dockerfile: Dockerfile
+          path: ./api
+
 workflows:
   build-test:
     when:
@@ -105,24 +130,29 @@ workflows:
       - copy-cf-script-s3
       - build-test-ui
       - build-test-api
-      # - bundle-code:
-      #     requires:
-      #       - build-test-ui
-      #       - build-test-api
-      - aws-ecr/build-and-push-image:
-          pre-steps: # steps to run before steps defined in the job bar
-            - restore_cache:
-                key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
-            - run: cp -r ui api
-          name: build-push-image
-          attach-workspace: true
-          repo: test-ecr
-          tag: "build-<<pipeline.number>>"
-          dockerfile: Dockerfile
-          path: ./api
+      - bundle-code:
           requires:
             - build-test-ui
             - build-test-api
+      # - aws-ecr/build-and-push-image:
+      #     pre-steps:
+      #       - attach_workspace:
+      #           at: .
+      #       - restore_cache:
+      #           keys: 
+      #             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+      #             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      #     name: build-push-image
+      #     attach-workspace: false
+      #     repo: test-ecr
+      #     tag: "build-<<pipeline.number>>"
+      #     dockerfile: Dockerfile
+      #     path: ./api
+      #     requires:
+      #       - bundle-code
+      - build-push-image:
+          requires:
+            - bundle-code
       - deploy-app:
           requires:
             - copy-cf-script-s3
