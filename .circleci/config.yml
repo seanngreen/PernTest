@@ -36,10 +36,10 @@ jobs:
       # - run:
       #     command: npm -C ui run test
       #     name: Running unit tests
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ui/build
+      # - persist_to_workspace:
+      #     root: .
+      #     paths:
+      #       - ui/build
   build-test-api:
     executor: node-executor
     steps:
@@ -59,18 +59,18 @@ jobs:
       # - run:
       #     command: npm -C api run test
       #     name: Running unit tests
-      - persist_to_workspace:
-          root: .
-          paths:
-            - api/dist
-  bundle-code:
-    executor: aws-cli/default
-    steps:
-      - attach_workspace:
-          at: . 
-      - run:
-          command: |
-            cp -r ui/build api/dist
+      # - persist_to_workspace:
+      #     root: .
+      #     paths:
+      #       - api/dist
+  # bundle-code:
+  #   executor: aws-cli/default
+  #   steps:
+  #     - attach_workspace:
+  #         at: . 
+  #     - run:
+  #         command: |
+  #           cp -r ui/build api/dist
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
@@ -103,18 +103,28 @@ workflows:
     when: << pipeline.parameters.deploy >>
     jobs:
       - copy-cf-script-s3
-      # - build-test-ui
-      # - build-test-api
+      - build-test-ui
+      - build-test-api
       # - bundle-code:
       #     requires:
       #       - build-test-ui
       #       - build-test-api
       - aws-ecr/build-and-push-image:
+          pre-steps: # steps to run before steps defined in the job bar
+            - checkout
+            - restore_cache:
+                key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+            - run: cp -r ui api
           name: build-push-image
+          attach-workspace: true
+          checkout: false
           repo: test-ecr
           tag: "build-<<pipeline.number>>"
           dockerfile: Dockerfile
           path: ./release
+          requires:
+            - build-test-ui
+            - build-test-api
       - deploy-app:
           requires:
             - copy-cf-script-s3
