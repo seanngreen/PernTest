@@ -152,8 +152,7 @@ workflows:
       #       - bundle-code
       - build-push-image:
           requires:
-            - build-test-ui
-            - build-test-api
+            - bundle-code
       - deploy-app:
           requires:
             - copy-cf-script-s3
