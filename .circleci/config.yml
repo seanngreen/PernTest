@@ -106,6 +106,9 @@ jobs:
           keys: 
             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      - run: |
+          ls -l
+          ls -l api
       - aws-ecr/build-and-push-image:
           checkout: false
           attach-workspace: false
@@ -146,8 +149,7 @@ workflows:
       #     dockerfile: Dockerfile
       #     path: ./api
       #     requires:
-      #       - build-test-ui
-      #       - build-test-api
+      #       - bundle-code
       - build-push-image:
           requires:
             - build-test-ui
