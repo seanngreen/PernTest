@@ -111,7 +111,6 @@ workflows:
       #       - build-test-api
       - aws-ecr/build-and-push-image:
           pre-steps: # steps to run before steps defined in the job bar
-            - checkout
             - restore_cache:
                 key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
             - run: cp -r ui api
