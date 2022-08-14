@@ -116,11 +116,10 @@ workflows:
             - run: cp -r ui api
           name: build-push-image
           attach-workspace: true
-          checkout: false
           repo: test-ecr
           tag: "build-<<pipeline.number>>"
           dockerfile: Dockerfile
-          path: ./release
+          path: ./api
           requires:
             - build-test-ui
             - build-test-api
