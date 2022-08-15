@@ -86,6 +86,27 @@ jobs:
       - aws-s3/copy:
           from: ./.aws/Stack.yaml
           to: "s3://cf-templates-1c2gml3thnaeq-us-west-1"
+  build-push-image:
+    executor: aws-ecr/default
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys: 
+            - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+            - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      - run: |
+          echo "root contents"
+          ls -l
+          echo "api contents"
+          ls -l api
+      # - aws-ecr/build-and-push-image:
+      #     checkout: false
+      #     attach-workspace: false
+      #     repo: test-ecr
+      #     tag: "build-<<pipeline.number>>"
+      #     dockerfile: Dockerfile
+      #     path: ./api
   deploy-app:
     executor: aws-cli/default
     steps:
@@ -98,24 +119,6 @@ jobs:
             --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" \
             --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" \
             --capabilities CAPABILITY_NAMED_IAM
-  build-push-image:
-    executor: aws-ecr/default
-    steps:
-      - attach_workspace:
-          at: .
-      - restore_cache:
-          keys: 
-            - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
-            - api-node_modules-v1-{{checksum "api/package-lock.json"}}
-      - run: |
-          ls -l
-      - aws-ecr/build-and-push-image:
-          checkout: false
-          attach-workspace: false
-          repo: test-ecr
-          tag: "build-<<pipeline.number>>"
-          dockerfile: Dockerfile
-          path: ./api
 
 workflows:
   build-test:
@@ -153,7 +156,7 @@ workflows:
       - build-push-image:
           requires:
             - bundle-code
-      - deploy-app:
-          requires:
-            - copy-cf-script-s3
-            - build-push-image 
+      # - deploy-app:
+      #     requires:
+      #       - copy-cf-script-s3
+      #       - build-push-image 
