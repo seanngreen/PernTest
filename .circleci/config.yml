@@ -96,6 +96,8 @@ jobs:
             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - run: |
+          cp -r ui/build api
+          rm -r ui
           echo "root contents"
           ls -l
           echo "api contents"
