@@ -12,7 +12,7 @@ ENV PORT=80
 
 WORKDIR /app
 
-COPY ./api .
+COPY . .
 
 CMD [ "node", "server.js" ]
 
