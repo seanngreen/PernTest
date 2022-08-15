@@ -83,7 +83,7 @@ jobs:
       - attach_workspace:
           at: .
       - restore_cache:
-          keys: 
+          keys:
             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - run: |
@@ -101,8 +101,8 @@ jobs:
     steps:
       - aws-cli/setup:
           profile-name: adminuser
-      # - run: aws ecr list-images --repository-name test-ecr #for testing connectivity 
-      - run: 
+      # - run: aws ecr list-images --repository-name test-ecr #for testing connectivity
+      - run:
           command: |
             aws cloudformation create-stack --stack-name "build-<<pipeline.number>>"  \
             --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" \
@@ -122,22 +122,6 @@ workflows:
       - copy-cf-script-s3
       - build-test-ui
       - build-test-api
-      # - aws-ecr/build-and-push-image:
-      #     pre-steps:
-      #       - attach_workspace:
-      #           at: .
-      #       - restore_cache:
-      #           keys: 
-      #             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
-      #             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
-      #     name: build-push-image
-      #     attach-workspace: false
-      #     repo: test-ecr
-      #     tag: "build-<<pipeline.number>>"
-      #     dockerfile: Dockerfile
-      #     path: ./api
-      #     requires:
-      #       - bundle-code
       - build-push-image:
           requires:
             - build-test-ui
@@ -145,4 +129,4 @@ workflows:
       - deploy-app:
           requires:
             - copy-cf-script-s3
-            - build-push-image 
+            - build-push-image
