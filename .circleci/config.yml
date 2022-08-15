@@ -70,15 +70,6 @@ jobs:
           root: .
           paths:
             - api
-  bundle-code:
-    executor: aws-cli/default
-    steps:
-      - attach_workspace:
-          at: . 
-      - run:
-          command: |
-            cp -r ui/build api
-            rm -r ui
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
@@ -96,17 +87,15 @@ jobs:
             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - run: |
-          echo "root contents"
-          ls -l
-          echo "api contents"
-          ls -l api
-      # - aws-ecr/build-and-push-image:
-      #     checkout: false
-      #     attach-workspace: false
-      #     repo: test-ecr
-      #     tag: "build-<<pipeline.number>>"
-      #     dockerfile: Dockerfile
-      #     path: ./api
+          cp -r ui/build api
+          rm -r ui
+      - aws-ecr/build-and-push-image:
+          checkout: false
+          attach-workspace: false
+          repo: test-ecr
+          tag: "build-<<pipeline.number>>"
+          dockerfile: Dockerfile
+          path: ./api
   deploy-app:
     executor: aws-cli/default
     steps:
@@ -133,10 +122,6 @@ workflows:
       - copy-cf-script-s3
       - build-test-ui
       - build-test-api
-      - bundle-code:
-          requires:
-            - build-test-ui
-            - build-test-api
       # - aws-ecr/build-and-push-image:
       #     pre-steps:
       #       - attach_workspace:
@@ -155,8 +140,9 @@ workflows:
       #       - bundle-code
       - build-push-image:
           requires:
-            - bundle-code
-      # - deploy-app:
-      #     requires:
-      #       - copy-cf-script-s3
-      #       - build-push-image 
+            - build-test-ui
+            - build-test-api
+      - deploy-app:
+          requires:
+            - copy-cf-script-s3
+            - build-push-image 
