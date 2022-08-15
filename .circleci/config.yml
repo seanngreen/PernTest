@@ -1,14 +1,15 @@
 version: 2.1
 orbs:
   node: circleci/node@5.0.2
+  jq: circleci/jq@2.2.0
   aws-ecr: circleci/aws-ecr@8.1.2
-  aws-cli: circleci/aws-cli@2.0.3
+  aws-cli: circleci/aws-cli@3.1.1
   aws-s3: circleci/aws-s3@3.0.0
 
 parameters:
   deploy:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node-executor:
@@ -17,70 +18,97 @@ executors:
 
 jobs:
   build-test-ui:
-    executor: 
-      name: node/default
-      tag: "16.14"
+    executor: node-executor
     steps:
       - checkout
+      - run: echo 'export UI_CACHE_KEY="ui-node_modules-v1-{{checksum "ui/package-lock.json"}}"' >> $BASH_ENV
+      - restore_cache:
+          key: ${UI_CACHE_KEYui-node_modules-v1-{{checksum "ui/package-lock.json"}}
       - node/install-packages:
           app-dir: ui
           pkg-manager: npm
-      - run: 
+      - save_cache:
+          key: ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+          paths:
+            - ./ui/node_modules
+      - run:
           command: CI=false npm -C ui run build
           name: Building UI
-      # - run: 
+      # - run:
       #     command: npm -C ui run test
       #     name: Running unit tests
       - persist_to_workspace:
           root: .
           paths:
-            - ui/build
+            - ./ui/build
+            - ./ui/package-lock.json
+      - run:
+          name: "Setup custom environment variables"
+          command: echo 'export MY_ENV_VAR="FOO"' >> $BASH_ENV
   build-test-api:
-    executor: 
-      name: node/default
-      tag: "16.14"
+    executor: node-executor
     steps:
       - checkout
+      - restore_cache:
+          key: api-node_modules-v1-{{checksum "api/package-lock.json"}}
       - node/install-packages:
           app-dir: api
           pkg-manager: npm
-      - run: 
+      - save_cache:
+          key: api-node_modules-v1-{{checksum "api/package-lock.json"}}
+          paths:
+            - ./api/node_modules
+      - run:
           command: CI=false npm -C api run build
           name: Building API
-      # - run: 
+      - run:
+          command: rm -r api/dist
+      # - run:
       #     command: npm -C api run test
       #     name: Running unit tests
       - persist_to_workspace:
           root: .
           paths:
-            - api/dist
-  bundle-code:
-    executor: aws-cli/default
-    steps:
-      - attach_workspace:
-          at: .
-      - run: 
-          command: |
-            ls -l
-            ls -l api
-            ls -l ui
-            cp -r ui/build api/dist
-            ls -l api/dist
+            - api
   copy-cf-script-s3:
     executor: aws-cli/default
     steps:
       - checkout
       - aws-s3/copy:
           from: ./.aws/Stack.yaml
-          to: 's3://cf-templates-1c2gml3thnaeq-us-west-1'
-  aws-cli-example:
+          to: "s3://cf-templates-1c2gml3thnaeq-us-west-1"
+  build-push-image:
+    executor: aws-ecr/default
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          keys: 
+            - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+            - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      - run: |
+          cp -r ui/build api
+          rm -r ui
+      - aws-ecr/build-and-push-image:
+          checkout: false
+          attach-workspace: false
+          repo: test-ecr
+          tag: "build-<<pipeline.number>>"
+          dockerfile: Dockerfile
+          path: ./api
+  deploy-app:
     executor: aws-cli/default
     steps:
-      #- checkout
       - aws-cli/setup:
           profile-name: adminuser
-      - run: aws ecr list-images --repository-name test-ecr
-      
+      # - run: aws ecr list-images --repository-name test-ecr #for testing connectivity 
+      - run: 
+          command: |
+            aws cloudformation create-stack --stack-name "build-<<pipeline.number>>"  \
+            --template-url "https://cf-templates-1c2gml3thnaeq-us-west-1.s3.us-west-1.amazonaws.com/Stack.yaml" \
+            --parameters ParameterKey="ImageName",ParameterValue="743750537978.dkr.ecr.us-west-1.amazonaws.com/test-ecr:build-<<pipeline.number>>" \
+            --capabilities CAPABILITY_NAMED_IAM
+
 workflows:
   build-test:
     when:
@@ -91,18 +119,30 @@ workflows:
   build-deploy:
     when: << pipeline.parameters.deploy >>
     jobs:
-      - aws-cli-example
-      #- copy-cf-script-s3
-      # - build-test-ui
-      # - build-test-api
-      # - bundle-code:
-      #     requires:
-      #       - build-test-ui
-      #       - build-test-api
+      - copy-cf-script-s3
+      - build-test-ui
+      - build-test-api
       # - aws-ecr/build-and-push-image:
-      #     name: Build and push image to AWS ECR
+      #     pre-steps:
+      #       - attach_workspace:
+      #           at: .
+      #       - restore_cache:
+      #           keys: 
+      #             - ui-node_modules-v1-{{checksum "ui/package-lock.json"}}
+      #             - api-node_modules-v1-{{checksum "api/package-lock.json"}}
+      #     name: build-push-image
+      #     attach-workspace: false
       #     repo: test-ecr
-      #     tag: "latest,v0.1.${CIRCLE_BUILD_NUM}"
+      #     tag: "build-<<pipeline.number>>"
       #     dockerfile: Dockerfile
-      #     path: ./release
-
+      #     path: ./api
+      #     requires:
+      #       - bundle-code
+      - build-push-image:
+          requires:
+            - build-test-ui
+            - build-test-api
+      - deploy-app:
+          requires:
+            - copy-cf-script-s3
+            - build-push-image 
