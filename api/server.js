@@ -14,7 +14,7 @@ const customCss = fs.readFileSync((process.cwd()+"/swagger.css"), 'utf8');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, './ui/build/')));
+app.use(express.static(path.join(__dirname, './build/')));
 
 // let express to use this
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {customCss}));
